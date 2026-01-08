@@ -38,14 +38,23 @@ pipeline {
         stage('Deploy to EKS') {
   steps {
     sh '''
+    echo "DOCKER_USER=$DOCKER_USER"
+    echo "IMAGE_TAG=$BUILD_NUMBER"
+
     export DOCKER_USER=$DOCKER_USER
     export IMAGE_TAG=$BUILD_NUMBER
 
-    envsubst < k8s/deployment.yml | kubectl apply -f -
+    envsubst < k8s/deployment.yml > /tmp/deployment.rendered.yml
+
+    echo "Rendered manifest:"
+    cat /tmp/deployment.rendered.yml
+
+    kubectl apply -f /tmp/deployment.rendered.yml
     kubectl rollout status deployment/devops-app
     '''
   }
 }
+
 
     }
 }
