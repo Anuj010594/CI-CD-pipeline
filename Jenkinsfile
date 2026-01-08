@@ -36,13 +36,17 @@ pipeline {
         }
 
         stage('Deploy to EKS') {
-            steps {
-                sh '''
-                sed -i "s|DOCKER_USER/devops-app:BUILD_TAG|$DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER|g" k8s/deployment.yml
-                kubectl apply -f k8s/
-                '''
-            }
-        }
+  steps {
+    sh '''
+    export DOCKER_USER=$DOCKER_USER
+    export IMAGE_TAG=$BUILD_NUMBER
+
+    envsubst < k8s/deployment.yml | kubectl apply -f -
+    kubectl rollout status deployment/devops-app
+    '''
+  }
+}
+
     }
 }
 
