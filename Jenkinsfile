@@ -29,7 +29,7 @@ pipeline {
                     sh '''
                     docker login -u $DOCKER_USER -p $DOCKER_PASS
                     docker build -t $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER .
-                    docker push $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER
+                    docker push ceaser08/devops-app:$BUILD_NUMBER
                     '''
                 }
             }
