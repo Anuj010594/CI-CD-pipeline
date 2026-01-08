@@ -13,10 +13,10 @@ spec:
         app: devops
     spec:
       containers:
-        - name: devops-app
-          image: ${DOCKER_USER}/devops-app:${IMAGE_TAG}
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8080
+      - name: devops-app
+        image: ${DOCKER_USER}/devops-app:${IMAGE_TAG}
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
 
 
