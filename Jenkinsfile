@@ -59,6 +59,7 @@ pipeline {
 
                 # Apply and wait for rollout
                 kubectl apply -f /tmp/deployment.rendered.yml
+                kubectl apply -f k8s/service.yml
                 kubectl rollout status deployment/devops-app
                 '''
             }
