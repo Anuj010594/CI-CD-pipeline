@@ -8,10 +8,12 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - devops.172.20.52.96.nip.io
+        - a8aa584211293453ea917ac1a3244876-c8e1d2c3cb7c6951.elb.ap-south-1.amazonaws.com
+
       secretName: devops-tls
   rules:
-    - host: devops.172.20.52.96.nip.io
+    - host: a8aa584211293453ea917ac1a3244876-c8e1d2c3cb7c6951.elb.ap-south-1.amazonaws.com
+
       http:
         paths:
           - path: /
