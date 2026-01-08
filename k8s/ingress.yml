@@ -8,7 +8,7 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        devops.13.201.147.95.nip.io
+        - devops.13.201.147.95.nip.io
       secretName: devops-tls
   rules:
     - host: devops.13.201.147.95.nip.io
