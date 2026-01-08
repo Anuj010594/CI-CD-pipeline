@@ -2,20 +2,25 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "devops-app"
+        // Non-secret values (safe to keep here)
+        IMAGE_NAME  = "devops-app"
+        DOCKER_USER = "ceaser08"
     }
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build Java App') {
+        stage('Build Java Application') {
             steps {
-                sh 'cd app && mvn clean package'
+                sh '''
+                cd app
+                mvn clean package
+                '''
             }
         }
 
@@ -23,39 +28,41 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-creds',
-                    usernameVariable: 'DOCKER_USER',
+                    usernameVariable: 'DOCKER_USER_TMP',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
-                    docker login -u $DOCKER_USER -p $DOCKER_PASS
+                    echo "Building image: $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER"
+
+                    docker login -u $DOCKER_USER_TMP -p $DOCKER_PASS
+
                     docker build -t $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER .
-                    docker push ceaser08/devops-app:$BUILD_NUMBER
+                    docker push $DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER
                     '''
                 }
             }
         }
 
         stage('Deploy to EKS') {
-  steps {
-    sh '''
-    echo "DOCKER_USER=$DOCKER_USER"
-    echo "IMAGE_TAG=$BUILD_NUMBER"
+            steps {
+                sh '''
+                echo "Deploying image:"
+                echo "$DOCKER_USER/$IMAGE_NAME:$BUILD_NUMBER"
 
-    export DOCKER_USER=$DOCKER_USER
-    export IMAGE_TAG=$BUILD_NUMBER
+                export IMAGE_TAG=$BUILD_NUMBER
 
-    envsubst < k8s/deployment.yml > /tmp/deployment.rendered.yml
+                # Render Kubernetes manifest safely
+                envsubst < k8s/deployment.yml > /tmp/deployment.rendered.yml
 
-    echo "Rendered manifest:"
-    cat /tmp/deployment.rendered.yml
+                echo "Rendered deployment manifest:"
+                cat /tmp/deployment.rendered.yml
 
-    kubectl apply -f /tmp/deployment.rendered.yml
-    kubectl rollout status deployment/devops-app
-    '''
-  }
-}
-
-
+                # Apply and wait for rollout
+                kubectl apply -f /tmp/deployment.rendered.yml
+                kubectl rollout status deployment/devops-app
+                '''
+            }
+        }
     }
 }
-
+}
